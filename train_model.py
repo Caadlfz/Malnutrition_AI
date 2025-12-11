@@ -1,27 +1,34 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
 import joblib
 
-data = {
-    'Age_Months': [12, 24, 36, 12, 24, 36, 48, 10, 60, 18],
-    'Height_cm':  [75, 87, 96, 60, 70, 80, 103, 70, 110, 78],
-    'Weight_kg':  [10, 12, 14, 6, 8, 10, 16, 9, 18, 11],
-    'Status':     [0, 0, 0, 1, 1, 1, 0, 0, 0, 0] # 0: Healthy, 1: Malnourished
-}
-df = pd.DataFrame(data)
+# 1. LOAD DATA
+# Load the specific CSV file uploaded
+df = pd.read_csv('malnutrition_data_Children.csv')
 
 # 2. PREPARE DATA
-X = df[['Age_Months', 'Height_cm', 'Weight_kg']] # Features
-y = df['Status']                                 # Labels
+# Features: We select the columns that match the user input
+X = df[['age_months', 'height_cm', 'weight_kg']]
+
+# Labels: Map the text status to numbers for the AI to understand
+# normal -> 0
+# moderate -> 1
+# severe -> 2
+label_mapping = {'normal': 0, 'moderate': 1, 'severe': 2}
+y = df['nutrition_status'].map(label_mapping)
 
 # 3. TRAIN MODEL
-# We use Random Forest, a common algorithm for classification tasks
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-model = RandomForestClassifier(n_estimators=100)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Create and train the classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
+y_pred = model.predict(X_test)
+print(classification_report(y_test, y_pred))
+
 # 4. SAVE THE MODEL
-# This allows the website to use the AI without retraining it every time
-joblib.dump(model, 'malnutrition_model.pkl')
-print("Model trained and saved as 'malnutrition_model.pkl'")
+joblib.dump(model, 'malnutrition_model2.pkl')
+print("Model trained with new dataset and saved as 'malnutrition_model.pkl'")
