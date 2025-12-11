@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Child Malnutrition Monitor</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; }
+        button { background-color: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>Malnutrition Monitor AI</h1>
+    <p>Enter child's details to assess nutritional status.</p>
+    
+    <div class="form-group">
+        <label>Age (Months):</label>
+        <input type="number" id="age" required>
+    </div>
+    <div class="form-group">
+        <label>Height (cm):</label>
+        <input type="number" id="height" step="0.1" required>
+    </div>
+    <div class="form-group">
+        <label>Weight (kg):</label>
+        <input type="number" id="weight" step="0.1" required>
+    </div>
+
+    <button onclick="checkMalnutrition()">Check Status</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function checkMalnutrition() {
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ age, height, weight })
+            });
+
+            const data = await response.json();
+            const resultDiv = document.getElementById('result');
+            
+            if (data.result) {
+                resultDiv.innerText = "Prediction: " + data.result;
+                resultDiv.style.color = data.result.includes("Healthy") ? "green" : "red";
+            } else {
+                resultDiv.innerText = "Error processing data.";
+            }
+        }
+    </script>
+</body>
+</html>
